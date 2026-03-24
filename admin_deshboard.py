@@ -15,4 +15,5 @@ def show():
     st.dataframe(df)
 
     st.subheader("Login Statistics")
-    st.bar_chart(df["status"].value_counts())
+    df.columns = df.columns
+    st.bar_chart(df["Status"].value_counts())

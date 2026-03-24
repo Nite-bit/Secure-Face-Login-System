@@ -4,13 +4,12 @@ import os
 
 def show():
 
-    st.title("📝 Register")
-
-    role = st.selectbox("Select Role", ["Admin", "User"])
+    st.title("Register Face")
 
     name = st.text_input("Enter Name")
+    role = st.selectbox("Select Role", ["Admin", "User"])
 
-    if st.button("Capture Face") and name:
+    if st.button("Start Registration"):
 
         if role == "Admin":
             path = f"dataset/admins/{name}"
@@ -21,25 +20,30 @@ def show():
 
         cap = cv2.VideoCapture(0)
 
+        st.info("Press SPACE in camera window")
+
+        while True:
+            ret, frame = cap.read()
+            cv2.imshow("Register Face", frame)
+
+            if cv2.waitKey(1) == 32:  # SPACE pressed
+                break
+
         count = 0
 
-        st.write("Capturing images...")
-
-        while count < 20:
+        while count < 10:
             ret, frame = cap.read()
-            cv2.imshow("Register", frame)
 
-            cv2.imwrite(f"{path}/{count}.jpg", frame)
+            img_path = f"{path}/{count}.jpg"
+            cv2.imwrite(img_path, frame)
+
             count += 1
-
-            if cv2.waitKey(1) == 27:
-                break
+            cv2.waitKey(300)
 
         cap.release()
         cv2.destroyAllWindows()
 
-        st.success("Registration Successful")
-
+        st.success("Registration Completed")
     if st.button("⬅ Back"):
         st.session_state.page = "home"
         st.rerun()
