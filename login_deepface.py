@@ -41,59 +41,58 @@ def show():
 
         st.write("Scanning Face...")
 
-        # Capture automatically
         ret, frame = cap.read()
-
         cv2.imwrite("test.jpg", frame)
 
         cap.release()
 
-# -------- Check Admin Dataset --------
-try:
-    admin_result = DeepFace.find(
-        img_path="test.jpg",
-        db_path="dataset/admins",
-        enforce_detection=False
-    )
+        # -------- Check Admin Dataset --------
+        try:
+            admin_result = DeepFace.find(
+                img_path="test.jpg",
+                db_path="dataset/admins",
+                model_name="SFace",
+                enforce_detection=False
+            )
 
-    if len(admin_result[0]) > 0:
-        identity_path = admin_result[0].iloc[0]["identity"]
-        name = os.path.basename(os.path.dirname(identity_path))
+            if len(admin_result[0]) > 0:
+                identity_path = admin_result[0].iloc[0]["identity"]
+                name = os.path.basename(os.path.dirname(identity_path))
 
-        store_login(name, "Admin")
+                store_login(name, "Admin")
 
-        st.success(f"Admin Login Successful : {name}")
-        st.session_state.page = "admin"
+                st.success(f"Admin Login Successful : {name}")
+                st.session_state.page = "admin"
+                st.rerun()
+
+        except:
+            pass
+
+
+        # -------- Check User Dataset --------
+        try:
+            user_result = DeepFace.find(
+                img_path="test.jpg",
+                db_path="dataset/users",
+                model_name="SFace",
+                enforce_detection=False
+            )
+
+            if len(user_result[0]) > 0:
+                identity_path = user_result[0].iloc[0]["identity"]
+                name = os.path.basename(os.path.dirname(identity_path))
+
+                store_login(name, "User")
+
+                st.success(f"User Login Successful : {name}")
+                st.session_state.page = "user"
+                st.rerun()
+
+        except:
+            pass
+
+        st.error("Access Denied")
+
+    if st.button("⬅ Back"):
+        st.session_state.page = "home"
         st.rerun()
-
-except:
-    pass
-
-
-# -------- Check User Dataset --------
-try:
-    user_result = DeepFace.find(
-        img_path="test.jpg",
-        db_path="dataset/users",
-        enforce_detection=False
-    )
-
-    if len(user_result[0]) > 0:
-        identity_path = user_result[0].iloc[0]["identity"]
-        name = os.path.basename(os.path.dirname(identity_path))
-
-        store_login(name, "User")
-
-        st.success(f"User Login Successful : {name}")
-        st.session_state.page = "user"
-        st.rerun()
-
-except:
-    pass
-
-# -------- If not found --------
-st.error("Access Denied")
-
-if st.button("⬅ Back"):
-    st.session_state.page = "home"
-    st.rerun()
