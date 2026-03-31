@@ -18,3 +18,14 @@ def show():
     st.subheader("Login Statistics")
     df.columns = df.columns
     st.bar_chart(df["Status"].value_counts())
+
+    st.subheader("Login Distribution")
+    st.pyplot(df["Role"].value_counts().plot.pie(autopct='%1.1f%%').figure)
+
+    date = st.selectbox("Select Date", df["Date"].unique())
+    filtered = df[df["Date"] == date]
+    st.dataframe(filtered)
+
+    name = st.text_input("Search User")
+    if name:
+        st.dataframe(df[df["Name"].str.contains(name)])

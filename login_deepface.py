@@ -1,6 +1,27 @@
 import streamlit as st
 import cv2
 from deepface import DeepFace
+import csv
+from datetime import datetime
+import os
+
+def save_log(name, role, status):
+
+    file_path = "logs/login_log.csv"
+
+    # Create file if not exists
+    if not os.path.exists(file_path):
+        with open(file_path, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Name", "Role", "Date", "Time", "Status"])
+
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    time = now.strftime("%H:%M:%S")
+
+    with open(file_path, "a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([name, role, date, time, status])
 
 THRESHOLD = 0.4
 
@@ -42,7 +63,10 @@ def show():
                     if len(admin[0]) > 0:
                         if admin[0].iloc[0]["distance"] < THRESHOLD:
 
-                            status.success("Admin Detected ✅")
+                            name = admin[0].iloc[0]["identity"].split("\\")[-2]
+                            save_log(name, "Admin", "Success")   # ✅ ADD HERE
+
+                            status.success("Admin Detected ✅ ({name})")
 
                             cap.release()
                             cv2.destroyAllWindows()
@@ -62,7 +86,11 @@ def show():
                     if len(user[0]) > 0:
                         if user[0].iloc[0]["distance"] < THRESHOLD:
 
-                            status.success("User Detected ✅")
+                            name = user[0].iloc[0]["identity"].split("\\")[-2]
+
+                            save_log(name, "User", "Success")   # ✅ ADD HERE
+
+                            status.success("User Detected ✅ ({name})")
 
                             cap.release()
                             cv2.destroyAllWindows()
@@ -80,3 +108,7 @@ def show():
 
         # 🔥 AFTER LOOP → FORCE RERUN
         st.rerun()
+
+        # ❌ If login failed
+        if not st.session_state.logged_in:
+            save_log("Unknown", "Unknown", "Failed")
