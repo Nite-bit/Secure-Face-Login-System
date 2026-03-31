@@ -6,7 +6,8 @@ def show():
     st.title("📊 Admin Dashboard")
 
     if st.button("Logout"):
-        st.session_state.page = "login"
+        st.session_state.logged_in = False
+        st.session_state.role = None
         st.rerun()
 
     df = pd.read_csv("logs/login_log.csv")
