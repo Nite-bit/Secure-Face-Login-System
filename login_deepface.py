@@ -1,97 +1,53 @@
 import streamlit as st
 import cv2
 from deepface import DeepFace
-import pandas as pd
-from datetime import datetime
-import os
 
-
-# ---------- Function to Store Login ----------
-def store_login(name, role):
-
-    file = "logs/login_log.csv"
-
-    now = datetime.now()
-
-    data = {
-        "Name": name,
-        "Role": role,
-        "Date": now.strftime("%Y-%m-%d"),
-        "Time": now.strftime("%H:%M:%S"),
-        "Status": "Success"
-    }
-
-    if os.path.exists(file):
-        df = pd.read_csv(file)
-        df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
-    else:
-        df = pd.DataFrame([data])
-
-    df.to_csv(file, index=False)
-
-
-# ---------- Login Page ----------
 def show():
 
     st.title("🔑 Face Login")
 
-    if st.button("Scan Face"):
+    if st.button("Login with Face"):
 
         cap = cv2.VideoCapture(0)
 
-        st.write("Scanning Face...")
+        st.write("Capturing face...")
 
-        ret, frame = cap.read()
-        cv2.imwrite("test.jpg", frame)
+        while True:
+            ret, frame = cap.read()
+            cv2.imshow("Login", frame)
+
+            if cv2.waitKey(1) == 32:
+                cv2.imwrite("test.jpg", frame)
+                break
 
         cap.release()
+        cv2.destroyAllWindows()
 
-        # -------- Check Admin Dataset --------
-        try:
-            admin_result = DeepFace.find(
-                img_path="test.jpg",
-                db_path="dataset/admins",
-                model_name="SFace",
-                enforce_detection=False
-            )
+        # Check Admin
+        admin = DeepFace.find(
+            img_path="test.jpg",
+            db_path="dataset/admins",
+            enforce_detection=False
+        )
 
-            if len(admin_result[0]) > 0:
-                identity_path = admin_result[0].iloc[0]["identity"]
-                name = os.path.basename(os.path.dirname(identity_path))
+        if len(admin[0]) > 0:
+            st.success("Admin Login Successful")
+            st.session_state.page = "admin"
+            st.rerun()
 
-                store_login(name, "Admin")
+        # Check User
+        user = DeepFace.find(
+            img_path="test.jpg",
+            db_path="dataset/users",
+            enforce_detection=False
+        )
 
-                st.success(f"Admin Login Successful : {name}")
-                st.session_state.page = "admin"
-                st.rerun()
+        if len(user[0]) > 0:
+            st.success("User Login Successful")
+            st.session_state.page = "user"
+            st.rerun()
 
-        except:
-            pass
-
-
-        # -------- Check User Dataset --------
-        try:
-            user_result = DeepFace.find(
-                img_path="test.jpg",
-                db_path="dataset/users",
-                model_name="SFace",
-                enforce_detection=False
-            )
-
-            if len(user_result[0]) > 0:
-                identity_path = user_result[0].iloc[0]["identity"]
-                name = os.path.basename(os.path.dirname(identity_path))
-
-                store_login(name, "User")
-
-                st.success(f"User Login Successful : {name}")
-                st.session_state.page = "user"
-                st.rerun()
-
-        except:
-            pass
-
-        st.error("Access Denied")
+        st.error("Access Denied ❌")
 
     if st.button("⬅ Back"):
         st.session_state.page = "home"
