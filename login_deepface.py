@@ -27,7 +27,7 @@ THRESHOLD = 0.4
 
 def show():
 
-    st.title("🔑 Face Login (Auto Mode)")
+    st.title("🔑 Face Login")
 
     if st.button("Start Camera"):
 
@@ -37,11 +37,13 @@ def show():
         status.info("Look at camera for authentication...")
 
         frame_count = 0
+        detected = False   # ✅ track match
 
         while True:
             ret, frame = cap.read()
 
             if not ret:
+                status.error("Camera error ❌")
                 break
 
             cv2.imshow("Login", frame)
@@ -64,9 +66,10 @@ def show():
                         if admin[0].iloc[0]["distance"] < THRESHOLD:
 
                             name = admin[0].iloc[0]["identity"].split("\\")[-2]
-                            save_log(name, "Admin", "Success")   # ✅ ADD HERE
 
-                            status.success("Admin Detected ✅ ({name})")
+                            save_log(name, "Admin", "Success")
+
+                            status.success(f"Admin Detected ✅ ({name})")
 
                             cap.release()
                             cv2.destroyAllWindows()
@@ -74,7 +77,8 @@ def show():
                             st.session_state.logged_in = True
                             st.session_state.role = "admin"
 
-                            break   # 🔥 VERY IMPORTANT
+                            detected = True
+                            break
 
                     # 🔵 User Check
                     user = DeepFace.find(
@@ -88,9 +92,9 @@ def show():
 
                             name = user[0].iloc[0]["identity"].split("\\")[-2]
 
-                            save_log(name, "User", "Success")   # ✅ ADD HERE
+                            save_log(name, "User", "Success")
 
-                            status.success("User Detected ✅ ({name})")
+                            status.success(f"User Detected ✅ ({name})")
 
                             cap.release()
                             cv2.destroyAllWindows()
@@ -98,17 +102,27 @@ def show():
                             st.session_state.logged_in = True
                             st.session_state.role = "user"
 
-                            break   # 🔥 VERY IMPORTANT
+                            detected = True
+                            break
 
                 except:
-                    pass
+                    # ❌ Face not detected
+                    status.warning("Face not detected ⚠️ Please look at camera")
+
+            # ❌ Stop after some time
+            if frame_count > 200:
+                break
 
             if cv2.waitKey(1) == 27:
                 break
 
-        # 🔥 AFTER LOOP → FORCE RERUN
-        st.rerun()
+        cap.release()
+        cv2.destroyAllWindows()
 
-        # ❌ If login failed
-        if not st.session_state.logged_in:
+        # ✅ AFTER LOOP (IMPORTANT)
+        if not detected:
+            status.error("Face not matched ❌")
+
             save_log("Unknown", "Unknown", "Failed")
+
+        st.rerun()
