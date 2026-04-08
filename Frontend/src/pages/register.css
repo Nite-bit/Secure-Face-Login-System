@@ -1,0 +1,107 @@
+/* MAIN CONTAINER */
+.register-container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* LEFT SIDE (COLORED BACKGROUND) */
+.left-section {
+  flex: 1;
+  background: #0b1c2c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* IMAGE CARD (SMALL + ROUNDED) */
+.image-box {
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: url("/security.jpg") no-repeat center/cover;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: fadeIn 1.5s ease;
+}
+
+/* RIGHT SIDE */
+.right-section {
+  flex: 1;
+  background: #0b1c2c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* FORM BOX */
+.form-box {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 40px;
+  border-radius: 15px;
+  backdrop-filter: blur(15px);
+  text-align: center;
+  width: 320px;
+  animation: slideIn 1s ease;
+}
+
+/* TITLE */
+.form-box h1 {
+  color: #00eaff;
+  margin-bottom: 20px;
+}
+
+/* INPUT */
+.form-box input,
+.form-box select {
+  width:90%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-bottom: 1px solid #00eaff;
+  background: transparent;
+  color: black;
+}
+
+/* BUTTON */
+.form-box button {
+  margin-top: 15px;
+  padding: 10px;
+  width: 100%;
+  background: #0b1c2c;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.form-box button:hover {
+  transform: scale(1.05);
+}
+
+/* BACK */
+.back-link {
+  margin-top: 15px;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.back-link:hover {
+  color: #00eaff;
+}
+
+/* ANIMATIONS */
+@keyframes slideIn {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

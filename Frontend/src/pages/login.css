@@ -1,0 +1,94 @@
+/* BACKGROUND */
+.login-container {
+  height: 100vh;
+  background: radial-gradient(circle, #001f2f, #000);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #00eaff;
+}
+
+/* SCANNER BOX */
+.scanner-box {
+  text-align: center;
+}
+
+/* BIGGER CIRCLE */
+.scanner-circle {
+  width: 380px;   /* 👈 INCREASED */
+  height: 380px;
+  border: 3px solid #00eaff;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 40px #00eaff;
+  overflow: hidden;
+}
+
+/* CAMERA VIDEO */
+.camera {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* SCAN LINE */
+.scan-line {
+  width: 100%;
+  height: 3px;
+  background: #00eaff;
+  position: absolute;
+  top: 0;
+  animation: scan 2s infinite;
+}
+
+/* TEXT */
+.face-text {
+  position: absolute;
+  bottom: 15px;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* 🔥 BUTTONS IMPROVED */
+.scan-btn {
+  margin-top: 25px;
+  padding: 12px 25px;
+  background: #00eaff;
+  border: none;
+  color: black;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 15px #00eaff;
+  transition: 0.3s;
+}
+
+.scan-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px #00eaff;
+}
+
+/* BACK BUTTON */
+.back-btn {
+  margin-top: 25px;
+  margin-left: 20px;
+  background: transparent;
+  border: 1px solid #aaa;
+  padding: 8px 15px;
+  border-radius: 6px;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  color: white;
+  border-color: white;
+}
+
+/* ANIMATION */
+@keyframes scan {
+  0% { top: 0; }
+  50% { top: 100%; }
+  100% { top: 0; }
+}

@@ -1,0 +1,99 @@
+/* Background */
+.home-container {
+  height: 100vh;
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)),
+              url("/Lock.jpg") no-repeat center/cover;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+}
+
+/* Logo */
+.logo {
+  font-size: 22px;
+  color: #00eaff;
+  font-weight: bold;
+}
+
+/* Links */
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.nav-links li {
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-links li:hover {
+  color: #00eaff;
+}
+
+/* Buttons */
+.nav-buttons button {
+  margin-left: 10px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+/* Login button */
+.login-btn {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+}
+
+/* Register button */
+.register-btn {
+  background: #00eaff;
+  color: black;
+}
+
+/* HERO SECTION */
+.hero {
+  margin-left: 80px;
+  margin-top: 120px;
+  max-width: 600px;
+}
+
+/* Title animation */
+.hero-title {
+  font-size: 50px;
+  color: #00eaff;
+  animation: slideLeft 1.5s ease;
+}
+
+/* Subtitle */
+.hero-subtitle {
+  margin-top: 20px;
+  color: #ccc;
+  animation: fadeIn 2s ease;
+}
+
+/* Animations */
+@keyframes slideLeft {
+  from {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
