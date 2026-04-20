@@ -67,7 +67,7 @@ def login():
                 # 🔴 Admin Check
                 admin = DeepFace.find(
                     img_path="test.jpg",
-                    db_path="dataset/admins",
+                    db_path="Dataset/admins",
                     enforce_detection=True
                 )
 
@@ -89,7 +89,7 @@ def login():
                 # 🔵 User Check
                 user = DeepFace.find(
                     img_path="test.jpg",
-                    db_path="dataset/users",
+                    db_path="Dataset/users",
                     enforce_detection=True
                 )
 
@@ -140,9 +140,9 @@ def register():
         return jsonify({"status": "error", "message": "Name required"})
 
     if role == "admin":
-        path = f"dataset/admins/{name}"
+        path = f"Dataset/admins/{name}"
     else:
-        path = f"dataset/users/{name}"
+        path = f"Dataset/users/{name}"
 
     os.makedirs(path, exist_ok=True)
 

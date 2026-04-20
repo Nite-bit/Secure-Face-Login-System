@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 import pandas as pd
-
-app = Flask(__name__)
+from app import app
 
 LOG_FILE = "logs/login_log.csv"
 

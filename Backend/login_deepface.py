@@ -1,92 +1,141 @@
-from flask import Flask, jsonify
+from flask import request, jsonify
 from flask_cors import CORS
 import cv2
 from deepface import DeepFace
+import base64
+import numpy as np
 import csv
 from datetime import datetime
 import os
+from app import app
 
-app = Flask(__name__)
-CORS(app)
+# ================= CONFIG =================
+CORS(app, resources={r"/*": {"origins": "*"}})
+THRESHOLD = 0.7
 
-THRESHOLD = 0.4
+# ================= PATH =================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+ADMIN_PATH = os.path.join(BASE_DIR, "Dataset", "admins")
+USER_PATH = os.path.join(BASE_DIR, "Dataset", "users")
+TEST_IMAGE_PATH = os.path.join(BASE_DIR, "test.jpg")
+
+print("ADMIN PATH:", ADMIN_PATH, os.path.exists(ADMIN_PATH))
+print("USER PATH:", USER_PATH, os.path.exists(USER_PATH))
 
 
+# ================= LOG =================
 def save_log(name, role, status):
+    log_dir = os.path.join(BASE_DIR, "logs")
+    os.makedirs(log_dir, exist_ok=True)
 
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
-
-    file_path = "logs/login_log.csv"
+    file_path = os.path.join(log_dir, "login_log.csv")
 
     if not os.path.exists(file_path):
-        with open(file_path, "w", newline="") as file:
-            writer = csv.writer(file)
+        with open(file_path, "w", newline="") as f:
+            writer = csv.writer(f)
             writer.writerow(["Name", "Role", "Date", "Time", "Status"])
 
     now = datetime.now()
-    date = now.strftime("%Y-%m-%d")
-    time = now.strftime("%H:%M:%S")
 
-    with open(file_path, "a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([name, role, date, time, status])
+    with open(file_path, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            name,
+            role,
+            now.strftime("%Y-%m-%d"),
+            now.strftime("%H:%M:%S"),
+            status
+        ])
 
 
+# ================= IMAGE DECODE =================
+def decode_image(base64_string):
+    try:
+        image_data = base64_string.split(",")[1]
+        image_bytes = base64.b64decode(image_data)
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        return img
+    except:
+        return None
+
+
+# ================= MATCH FUNCTION =================
+def match_face(test_img, db_path):
+    try:
+        for person in os.listdir(db_path):
+            person_path = os.path.join(db_path, person)
+
+            for img_name in os.listdir(person_path):
+                db_img = os.path.join(person_path, img_name)
+
+                result = DeepFace.verify(
+                    img1_path=test_img,
+                    img2_path=db_img,
+                    model_name="ArcFace",
+                    enforce_detection=False
+                )
+
+                print(f"Compare with {person}/{img_name} →", result["distance"])
+
+                if result["verified"] and result["distance"] < THRESHOLD:
+                    return True, person
+
+        return False, None
+
+    except Exception as e:
+        print("ERROR:", e)
+        return False, None
+
+
+# ================= LOGIN =================
 @app.route("/login", methods=["POST"])
 def login():
+    print("\n🔥 LOGIN API HIT")
 
-    cap = cv2.VideoCapture(0)
+    try:
+        data = request.json
+        image_data = data.get("image")
 
-    frame_count = 0
+        if not image_data:
+            return jsonify({"status": "error"})
 
-    while frame_count < 200:
-        ret, frame = cap.read()
+        img = decode_image(image_data)
 
-        if not ret:
-            return jsonify({"status": "error", "message": "Camera error"})
+        if img is None:
+            return jsonify({"status": "error"})
 
-        frame_count += 1
+        # Save image
+        cv2.imwrite(TEST_IMAGE_PATH, img)
 
-        if frame_count % 20 == 0:
-            cv2.imwrite("test.jpg", frame)
+        # ================= ADMIN =================
+        found, name = match_face(TEST_IMAGE_PATH, ADMIN_PATH)
 
-            try:
-                # 🔴 Admin
-                admin = DeepFace.find(
-                    img_path="test.jpg",
-                    db_path="Dataset/admins",
-                    enforce_detection=True
-                )
+        if found:
+            save_log(name, "Admin", "Success")
+            return jsonify({
+                "status": "success",
+                "role": "admin",
+                "name": name
+            })
 
-                if len(admin[0]) > 0 and admin[0].iloc[0]["distance"] < THRESHOLD:
-                    name = admin[0].iloc[0]["identity"].split("\\")[-2]
+        # ================= USER =================
+        found, name = match_face(TEST_IMAGE_PATH, USER_PATH)
 
-                    save_log(name, "Admin", "Success")
+        if found:
+            save_log(name, "User", "Success")
+            return jsonify({
+                "status": "success",
+                "role": "user",
+                "name": name
+            })
 
-                    cap.release()
-                    return jsonify({"status": "success", "role": "admin", "name": name})
+        # ================= FAIL =================
+        save_log("Unknown", "Unknown", "Failed")
 
-                # 🔵 User
-                user = DeepFace.find(
-                    img_path="test.jpg",
-                    db_path="Dataset/users",
-                    enforce_detection=True
-                )
+        return jsonify({"status": "fail"})
 
-                if len(user[0]) > 0 and user[0].iloc[0]["distance"] < THRESHOLD:
-                    name = user[0].iloc[0]["identity"].split("\\")[-2]
-
-                    save_log(name, "User", "Success")
-
-                    cap.release()
-                    return jsonify({"status": "success", "role": "user", "name": name})
-
-            except Exception as e:
-                print("Error:", e)
-
-    cap.release()
-
-    save_log("Unknown", "Unknown", "Failed")
-
-    return jsonify({"status": "fail", "message": "Face not matched"})
+    except Exception as e:
+        print("SERVER ERROR:", e)
+        return jsonify({"status": "error"})

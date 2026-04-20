@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
 import cv2
 import os
-
-app = Flask(__name__)
+from app import app
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -15,9 +14,9 @@ def register():
 
     # SAME LOGIC (unchanged)
     if role == "Admin":
-        path = f"dataset/admins/{name}"
+        path = f"Dataset/admins/{name}"
     else:
-        path = f"dataset/users/{name}"
+        path = f"Dataset/users/{name}"
 
     os.makedirs(path, exist_ok=True)
 
