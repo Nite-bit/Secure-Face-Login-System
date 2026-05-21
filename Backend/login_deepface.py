@@ -11,7 +11,7 @@ from app import app
 
 # ================= CONFIG =================
 CORS(app, resources={r"/*": {"origins": "*"}})
-THRESHOLD = 0.7
+THRESHOLD = 0.6
 
 # ================= PATH =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -73,7 +73,7 @@ def match_face(test_img, db_path):
                 result = DeepFace.verify(
                     img1_path=test_img,
                     img2_path=db_img,
-                    model_name="ArcFace",
+                    model_name="Facenet512",
                     enforce_detection=False
                 )
 
